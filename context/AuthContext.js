@@ -55,7 +55,15 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ username, email, password }),
       });
 
-      return response.ok; // Returns true if registration was successful
+      const data = await response.json();
+      if (response.ok) {
+        setUser(data.user);
+        await AsyncStorage.setItem("user", JSON.stringify(data.user));
+        await AsyncStorage.setItem("token", data.token); // Store JWT token
+        return true;
+      } else {
+        return false;
+      }// Returns true if registration was successful
     } catch (error) {
       console.error("Registration error:", error);
       return false;

@@ -5,6 +5,9 @@ import { AuthProvider, AuthContext } from "./context/AuthContext";
 import LoginScreen from "./screens/LoginScreen";
 import SignUpScreen from "./screens/SignUpScreen";
 import MainApp from "./screens/MainApp"; // Your home screen
+import FeedScreen from "./screens/FeedScreen";
+import CreatePostScreen from "./screens/CreatePostScreen";
+import FollowUserScreen from "./screens/FollowUserScreen";
 
 const Stack = createStackNavigator();
 
@@ -14,7 +17,12 @@ const AppNavigator = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user ? (
-        <Stack.Screen name="MainApp" component={MainApp} />
+        <>
+          <Stack.Screen name="Home" component={MainApp} />
+          <Stack.Screen name="Feed" component={FeedScreen} />
+          <Stack.Screen name="CreatePost" component={CreatePostScreen}/>
+          <Stack.Screen name="FollowUser" component={FollowUserScreen}/>
+        </>
       ) : (
         <>
           <Stack.Screen name="Login" component={LoginScreen} />

@@ -17,7 +17,7 @@ const SignUpScreen = ({ navigation }) => {
     const success = await register(username, email, password);
     if (success) {
       Alert.alert("Success", "Account created!");
-      navigation.replace("Login"); // Redirect to login page
+      //navigation.replace("Login"); // Redirect to login page
     } else {
       Alert.alert("Error", "Failed to create account");
     }
