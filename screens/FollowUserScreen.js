@@ -76,13 +76,15 @@ const FollowUserScreen = ({ navigation }) => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ followerId: user.id, followingId: targetUserId }),
             });
-
+            let message = response.json();
+            console.log(message);
             if (response.ok) {
+                console.log(response)
                 const updatedFollowing = new Set(following);
                 updatedFollowing.delete(targetUserId)
                 setFollowing(updatedFollowing); // Update state after following
             } else {
-                alert("Error following user.");
+                alert("Error unfollowing user.");
             }
         } catch (error) {
             console.error("Error:", error);
