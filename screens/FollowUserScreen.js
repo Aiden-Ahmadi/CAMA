@@ -10,15 +10,15 @@ const FollowUserScreen = ({ navigation }) => {
     const [loading, setLoading] = useState(false);
 
     // Fetch users based on search input
-    const searchUsers = async () => {
-        if (!searchQuery.trim()) {
+    const searchUsers = async (text) => {
+        if (!text.trim()) {
             setUsers([]);
             return;
         }
 
         setLoading(true);
         try {
-            const response = await fetch(`https://cama-express.onrender.com/users/search?username=${searchQuery}`);
+            const response = await fetch(`https://cama-express.onrender.com/users/search?username=${text}`);
             const data = await response.json();
 
             if (response.ok) {
@@ -105,7 +105,7 @@ const FollowUserScreen = ({ navigation }) => {
                 style={styles.input}
                 placeholder="Search by username..."
                 value={searchQuery}
-                onChangeText={setSearchQuery}
+                onChangeText={(text)=>{setSearchQuery(text);searchUsers(text);}}
                 onSubmitEditing={searchUsers} // Search when user presses "Enter"
             />
 
