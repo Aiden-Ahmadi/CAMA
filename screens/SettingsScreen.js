@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState, useContext } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { COLORS, SPACING } from "../constants/theme";
+import { AuthContext } from "../context/AuthContext";
 
-
-const SettingsScreen = ({ navigation }) => (
+const SettingsScreen = ({ navigation }) => {
+  const {logout} = useContext(AuthContext);
+  return (
   <View style={styles.container}>
     <Text style={styles.header}>Settings</Text>
     <TouchableOpacity style={styles.option} onPress={() => navigation.navigate("ProfileSettings")}>
@@ -18,8 +20,12 @@ const SettingsScreen = ({ navigation }) => (
     <TouchableOpacity style={styles.option} onPress={() => navigation.navigate("Agreement")}> 
       <Text style={styles.optionText}>User Agreement</Text>
     </TouchableOpacity>
+    <TouchableOpacity style={styles.option} onPress={logout}>
+      <Text style={styles.optionText}>Log Out</Text>
+    </TouchableOpacity>
   </View>
 );
+};
 
 const styles = StyleSheet.create({
   container: {

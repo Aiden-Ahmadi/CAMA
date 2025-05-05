@@ -67,9 +67,6 @@ const FeedScreen = ({ navigation }) => {
         />
       )}
 
-      <TouchableOpacity style={styles.logoutButton} onPress={() => navigation.goBack()}>
-        <Text style={styles.logoutButtonText}>Go Back</Text>
-      </TouchableOpacity>
     </View>
   );
 };

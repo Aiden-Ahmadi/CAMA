@@ -1,39 +1,87 @@
-import React from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions } from "react-native";
+import React, { useEffect, useState, useContext } from "react";
+import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, ActivityIndicator, ScrollView } from "react-native";
 import { COLORS, FONT, SPACING } from "../constants/theme";
-
+import { AuthContext } from "../context/AuthContext";
 
 const { width } = Dimensions.get("window");
 
 const UserProfileScreen = () => {
+  const { user } = useContext(AuthContext);
+  const [profilePosts, setProfilePosts] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserProfilePosts = async () => {
+      try {
+        if (!user) return;
+
+        console.log(user);
+        const response = await fetch(`https://cama-express.onrender.com/posts/${user.id}`);
+        console.log(response);
+        const data = await response.json();
+
+        if (response.ok) {
+          setProfilePosts(data);
+        } else {
+          console.error("Error fetching user profile:", data);
+        }
+      } catch (error) {
+        console.error("Server error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfilePosts();
+  }, [user]);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
+
+  if (!profilePosts) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.errorText}>Unable to load profile.</Text>
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Image
-          source={{ uri: "https://via.placeholder.com/100" }}
-          style={styles.avatar}
-        />
-        <Text style={styles.username}>sapiens</Text>
-        <Text style={styles.bio}>social traveler ✈️ | catch the drip worldwide</Text>
-        <Text style={styles.stars}>★★★★★</Text>
-      </View>
-
-      <View style={styles.tabRow}>
-        <TouchableOpacity style={styles.tab}><Text style={styles.tabText}>My Posts</Text></TouchableOpacity>
-        <TouchableOpacity style={styles.tab}><Text style={styles.tabText}>Pinpoints</Text></TouchableOpacity>
-      </View>
-
-      <View style={styles.gridContainer}>
-        {[...Array(9)].map((_, i) => (
-          <View key={i} style={styles.gridItem}>
-            <Text style={styles.gridText}>C</Text>
-          </View>
-        ))}
-      </View>
+    <ScrollView contentContainerStyle={styles.container}>
+    <View style={styles.header}>
+      <Image
+        source={{ uri: user.profileImage || "https://via.placeholder.com/100" }}
+        style={styles.avatar}
+      />
+      <Text style={styles.username}>{user.username}</Text>
+      <Text style={styles.bio}>{user.bio || "No bio yet."}</Text>
+      <Text style={styles.stars}>★★★★★</Text>
     </View>
+
+    <View style={styles.tabRow}>
+      <TouchableOpacity style={styles.tab}><Text style={styles.tabText}>My Posts</Text></TouchableOpacity>
+      <TouchableOpacity style={styles.tab}><Text style={styles.tabText}>Pinpoints</Text></TouchableOpacity>
+    </View>
+
+    <View style={styles.gridContainer}>
+      {profilePosts.map((post) =>
+        post.imageUrls.map((url, i) => (
+          <Image
+            key={`${post._id}-${i}`}
+            source={{ uri: url }}
+            style={styles.gridImage}
+          />
+        ))
+      )}
+    </View>
+  </ScrollView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -100,11 +148,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: SPACING.sm,
   },
+  gridImage: {
+    width: (width - SPACING.md * 2 - SPACING.sm * 2) / 3,
+    height: (width - SPACING.md * 2 - SPACING.sm * 2) / 3,
+    borderRadius: 6,
+    marginBottom: SPACING.sm,
+  },
   gridText: {
     fontSize: 18,
     fontWeight: "bold",
     color: COLORS.accent,
   },
 });
-
 export default UserProfileScreen;
