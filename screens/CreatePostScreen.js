@@ -120,10 +120,9 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
   },
   header: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: "900",
     color: "#000",
-    textTransform: "lowercase",
     marginBottom: SPACING.md,
   },
   input: {

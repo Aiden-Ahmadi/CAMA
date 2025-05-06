@@ -1,8 +1,10 @@
 import { COLORS, SPACING } from "../constants/theme";
 
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { View, Text, FlatList, Image, ActivityIndicator, StyleSheet, TouchableOpacity } from "react-native";
 import { AuthContext } from "../context/AuthContext";
+
 
 
 const FeedScreen = ({ navigation }) => {
@@ -10,28 +12,32 @@ const FeedScreen = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchFeedPosts = async () => {
-      try {
-        if (!user) return;
-
-        const response = await fetch(`https://cama-express.onrender.com/posts/feed/${user.id}`);
-        const data = await response.json();
-
-        if (response.ok) {
-          setPosts(data);
-        } else {
-          console.error("Error fetching posts:", data.message);
-        }
-      } catch (error) {
-        console.error("Server error:", error);
-      } finally {
-        setLoading(false);
+  const fetchFeedPosts = async () => {
+    try {
+      setLoading(true);
+      if (!user) return;
+  
+      const response = await fetch(`https://cama-express.onrender.com/posts/feed/${user.id}`);
+      const data = await response.json();
+  
+      if (response.ok) {
+        setPosts(data);
+      } else {
+        console.error("Error fetching posts:", data.message);
       }
-    };
+    } catch (error) {
+      console.error("Server error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchFeedPosts();
-  }, [user]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchFeedPosts();
+    }, [user])
+  );
+  
 
   if (loading) {
     return (
@@ -43,7 +49,12 @@ const FeedScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Your Feed</Text>
+      <TouchableOpacity
+        style={styles.searchBar}
+        onPress={() => navigation.navigate("FollowUser")}
+      >
+        <Text style={styles.searchBarText}>Search for users...</Text>
+      </TouchableOpacity>
 
       {posts.length === 0 ? (
         <Text style={styles.noPostsText}>No posts from people you follow.</Text>
@@ -72,6 +83,21 @@ const FeedScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  searchBar: {
+    height: 45,
+    borderColor: COLORS.inputBorder,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    justifyContent: "center",
+    backgroundColor: COLORS.white,
+    marginVertical: SPACING.md,
+  },
+  
+  searchBarText: {
+    color: COLORS.gray,
+    fontSize: 16,
+  },  
   container: {
     flex: 1,
     backgroundColor: COLORS.background,

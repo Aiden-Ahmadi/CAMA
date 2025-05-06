@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,8 @@ import {
 import { AuthContext } from "../context/AuthContext";
 import { COLORS, SPACING } from "../constants/theme";
 import { StyleSheet } from "react-native";
+import Icon from 'react-native-vector-icons/Ionicons'; // or Feather, MaterialIcons, etc.
+
 
 const FollowUserScreen = ({ navigation }) => {
   const { user } = useContext(AuthContext);
@@ -17,6 +19,12 @@ const FollowUserScreen = ({ navigation }) => {
   const [users, setUsers] = useState([]);
   const [following, setFollowing] = useState(new Set());
   const [loading, setLoading] = useState(false);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
 
   const searchUsers = async (text) => {
     if (!text.trim()) {
@@ -112,17 +120,22 @@ const FollowUserScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Search for Users</Text>
+      <View style={styles.topBar}>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <Icon name="chevron-back" size={28} color={COLORS.primary} />
+      </TouchableOpacity>
       <TextInput
-        style={styles.input}
+        ref={inputRef}
+        style={styles.searchInput}
         placeholder="Search by username..."
         value={searchQuery}
         onChangeText={(text) => {
           setSearchQuery(text);
           searchUsers(text);
         }}
-        onSubmitEditing={() => searchUsers(searchQuery)}
       />
+      </View>
+
       {loading ? (
         <ActivityIndicator size="large" color={COLORS.info} />
       ) : (
@@ -151,12 +164,6 @@ const FollowUserScreen = ({ navigation }) => {
               </View>
             )}
           />
-          <TouchableOpacity
-            style={styles.cancelButton}
-            onPress={() => navigation.goBack()}
-          >
-            <Text style={styles.cancelButtonText}>Cancel</Text>
-          </TouchableOpacity>
         </>
       )}
     </View>
@@ -164,10 +171,31 @@ const FollowUserScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  topBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 0,
+    paddingTop: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  
+  backButton: {
+    marginRight: 6,
+  },
+  searchInput: {
+    flex: 1,
+    height: 45,
+    backgroundColor: COLORS.white,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: COLORS.inputBorder,
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    padding: SPACING.md,
+    padding:6,
   },
   header: {
     fontSize: 24,

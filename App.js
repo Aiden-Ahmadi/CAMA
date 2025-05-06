@@ -9,11 +9,21 @@ import BottomNav from "./screens/BottomNav"; // Your home screen
 import FeedScreen from "./screens/FeedScreen";
 import CreatePostScreen from "./screens/CreatePostScreen";
 import FollowUserScreen from "./screens/FollowUserScreen";
+import { useEffect } from "react";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
+
+// useEffect(() => {
+//   const clear = async () => {
+//     await AsyncStorage.clear();
+//   };
+//   clear();
+// }, []);
 
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
   const { user } = useContext(AuthContext);
+  console.log(user);
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>

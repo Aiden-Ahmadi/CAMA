@@ -1,39 +1,41 @@
-import React, { useEffect, useState, useContext } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, ActivityIndicator, ScrollView } from "react-native";
-import { COLORS, FONT, SPACING } from "../constants/theme";
+import React, { useEffect, useState, useContext, useCallback } from "react";
+import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, ActivityIndicator, FlatList } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { COLORS, SPACING } from "../constants/theme";
 import { AuthContext } from "../context/AuthContext";
 
 const { width } = Dimensions.get("window");
 
 const UserProfileScreen = () => {
   const { user } = useContext(AuthContext);
-  const [profilePosts, setProfilePosts] = useState(null);
+  const [profilePosts, setProfilePosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchUserProfilePosts = async () => {
-      try {
-        if (!user) return;
+  const fetchUserProfilePosts = async () => {
+    try {
+      setLoading(true);
+      if (!user) return;
 
-        console.log(user);
-        const response = await fetch(`https://cama-express.onrender.com/posts/${user.id}`);
-        console.log(response);
-        const data = await response.json();
+      const response = await fetch(`https://cama-express.onrender.com/posts/${user.id}`);
+      const data = await response.json();
 
-        if (response.ok) {
-          setProfilePosts(data);
-        } else {
-          console.error("Error fetching user profile:", data);
-        }
-      } catch (error) {
-        console.error("Server error:", error);
-      } finally {
-        setLoading(false);
+      if (response.ok) {
+        setProfilePosts(data);
+      } else {
+        console.error("Error fetching user profile:", data.message);
       }
-    };
+    } catch (error) {
+      console.error("Server error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchUserProfilePosts();
-  }, [user]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserProfilePosts();
+    }, [user])
+  );
 
   if (loading) {
     return (
@@ -43,45 +45,50 @@ const UserProfileScreen = () => {
     );
   }
 
-  if (!profilePosts) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.errorText}>Unable to load profile.</Text>
-      </View>
-    );
-  }
-
+  const flatImages = profilePosts.flatMap((post) =>
+    post.imageUrls.map((url, index) => ({
+      url,
+      id: `${post._id}-${index}`,
+    }))
+  );
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-    <View style={styles.header}>
+  <FlatList
+    data={flatImages}
+    keyExtractor={(item) => item.id}
+    numColumns={3}
+    contentContainerStyle={styles.container}
+    renderItem={({ item, index }) => (
       <Image
-        source={{ uri: user.profileImage || "https://via.placeholder.com/100" }}
-        style={styles.avatar}
+        source={{ uri: item.url }}
+        style={[
+          styles.gridImage,
+          (index + 1) % 3 === 0 && { marginRight: 0 } // No right margin for last column
+        ]}
       />
-      <Text style={styles.username}>{user.username}</Text>
-      <Text style={styles.bio}>{user.bio || "No bio yet."}</Text>
-      <Text style={styles.stars}>★★★★★</Text>
-    </View>
-
-    <View style={styles.tabRow}>
-      <TouchableOpacity style={styles.tab}><Text style={styles.tabText}>My Posts</Text></TouchableOpacity>
-      <TouchableOpacity style={styles.tab}><Text style={styles.tabText}>Pinpoints</Text></TouchableOpacity>
-    </View>
-
-    <View style={styles.gridContainer}>
-      {profilePosts.map((post) =>
-        post.imageUrls.map((url, i) => (
+    )}
+    ListHeaderComponent={
+      <>
+        <View style={styles.header}>
           <Image
-            key={`${post._id}-${i}`}
-            source={{ uri: url }}
-            style={styles.gridImage}
+            source={{ uri: user.profileImage || "https://via.placeholder.com/100" }}
+            style={styles.avatar}
           />
-        ))
-      )}
-    </View>
-  </ScrollView>
+          <Text style={styles.username}>{user.username}</Text>
+          <Text style={styles.bio}>{user.bio || "No bio yet."}</Text>
+          <Text style={styles.stars}>★★★★★</Text>
+        </View>
+
+        <View style={styles.tabRow}>
+          <TouchableOpacity style={styles.tab}><Text style={styles.tabText}>My Posts</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.tab}><Text style={styles.tabText}>Pinpoints</Text></TouchableOpacity>
+        </View>
+      </>
+    }
+  />
+
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -149,11 +156,11 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   gridImage: {
-    width: (width - SPACING.md * 2 - SPACING.sm * 2) / 3,
-    height: (width - SPACING.md * 2 - SPACING.sm * 2) / 3,
-    borderRadius: 6,
-    marginBottom: SPACING.sm,
-  },
+    width: (width - SPACING.md * 2 - SPACING.sm) / 3,
+    height: (width - SPACING.md * 2 - SPACING.sm) / 3,
+    marginRight: SPACING.sm/2,
+    marginBottom: SPACING.sm/2,
+  },  
   gridText: {
     fontSize: 18,
     fontWeight: "bold",
