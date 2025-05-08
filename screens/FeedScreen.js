@@ -1,46 +1,60 @@
-import React, { useState, useEffect, useContext } from "react";
+import { COLORS, SPACING } from "../constants/theme";
+
+import React, { useState, useEffect, useContext, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { View, Text, FlatList, Image, ActivityIndicator, StyleSheet, TouchableOpacity } from "react-native";
 import { AuthContext } from "../context/AuthContext";
 
-const FeedScreen = ({navigation}) => {
-  const { user } = useContext(AuthContext); // Get the logged-in user
+
+
+const FeedScreen = ({ navigation }) => {
+  const { user } = useContext(AuthContext);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchFeedPosts = async () => {
-      try {
-        if (!user) return;
-
-        const response = await fetch(`https://cama-express.onrender.com/posts/feed/${user.id}`);
-        const data = await response.json();
-
-        if (response.ok) {
-          setPosts(data);
-        } else {
-          console.error("Error fetching posts:", data.message);
-        }
-      } catch (error) {
-        console.error("Server error:", error);
-      } finally {
-        setLoading(false);
+  const fetchFeedPosts = async () => {
+    try {
+      setLoading(true);
+      if (!user) return;
+  
+      const response = await fetch(`https://cama-express.onrender.com/posts/feed/${user.id}`);
+      const data = await response.json();
+  
+      if (response.ok) {
+        setPosts(data);
+      } else {
+        console.error("Error fetching posts:", data.message);
       }
-    };
+    } catch (error) {
+      console.error("Server error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchFeedPosts();
-  }, [user]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchFeedPosts();
+    }, [user])
+  );
+  
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007bff" />
+        <ActivityIndicator size="large" color={COLORS.info} />
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Your Feed</Text>
+      <TouchableOpacity
+        style={styles.searchBar}
+        onPress={() => navigation.navigate("FollowUser")}
+      >
+        <Text style={styles.searchBarText}>Search for users...</Text>
+      </TouchableOpacity>
 
       {posts.length === 0 ? (
         <Text style={styles.noPostsText}>No posts from people you follow.</Text>
@@ -51,7 +65,10 @@ const FeedScreen = ({navigation}) => {
           renderItem={({ item }) => (
             <View style={styles.postCard}>
               <View style={styles.postHeader}>
-                <Image source={{ uri: item.userId.profileImage || "https://via.placeholder.com/50" }} style={styles.profileImage} />
+                <Image
+                  source={{ uri: item.userId.profileImage || "https://via.placeholder.com/50" }}
+                  style={styles.profileImage}
+                />
                 <Text style={styles.username}>{item.userId.username}</Text>
               </View>
               <Image source={{ uri: item.imageUrls[0] }} style={styles.postImage} />
@@ -60,18 +77,31 @@ const FeedScreen = ({navigation}) => {
           )}
         />
       )}
-        <TouchableOpacity style={styles.logoutButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.logoutButtonText}>Go Back</Text>
-        </TouchableOpacity>
+
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  searchBar: {
+    height: 45,
+    borderColor: COLORS.inputBorder,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    justifyContent: "center",
+    backgroundColor: COLORS.white,
+    marginVertical: SPACING.md,
+  },
+  
+  searchBarText: {
+    color: COLORS.gray,
+    fontSize: 16,
+  },  
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
-    padding: 10,
+    backgroundColor: COLORS.background,
+    padding: SPACING.sm,
   },
   loadingContainer: {
     flex: 1,
@@ -82,19 +112,19 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
-    marginVertical: 15,
-    color: "#333",
+    marginVertical: SPACING.md,
+    color: COLORS.primary,
   },
   noPostsText: {
     textAlign: "center",
-    color: "#888",
-    marginTop: 20,
+    color: COLORS.gray,
+    marginTop: SPACING.md,
   },
   postCard: {
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 15,
+    backgroundColor: COLORS.white,
+    borderRadius: 10,
+    padding: SPACING.sm,
+    marginBottom: SPACING.md,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -103,28 +133,41 @@ const styles = StyleSheet.create({
   postHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: SPACING.sm,
   },
   profileImage: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    marginRight: 10,
+    marginRight: SPACING.sm,
   },
   username: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#333",
+    color: COLORS.primary,
   },
   postImage: {
     width: "100%",
     height: 200,
     borderRadius: 8,
-    marginBottom: 10,
+    marginBottom: SPACING.sm,
   },
   caption: {
     fontSize: 14,
-    color: "#555",
+    color: COLORS.gray,
+  },
+  logoutButton: {
+    backgroundColor: COLORS.accent,
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    alignSelf: "center",
+    marginTop: SPACING.sm,
+  },
+  logoutButtonText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 
