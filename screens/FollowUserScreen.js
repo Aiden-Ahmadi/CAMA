@@ -10,7 +10,7 @@ import {
 import { AuthContext } from "../context/AuthContext";
 import { COLORS, SPACING } from "../constants/theme";
 import { StyleSheet } from "react-native";
-import Icon from 'react-native-vector-icons/Ionicons'; // or Feather, MaterialIcons, etc.
+import Icon from 'react-native-vector-icons/Ionicons';
 
 
 const FollowUserScreen = ({ navigation }) => {

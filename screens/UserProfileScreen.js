@@ -62,7 +62,7 @@ const UserProfileScreen = () => {
         source={{ uri: item.url }}
         style={[
           styles.gridImage,
-          (index + 1) % 3 === 0 && { marginRight: 0 } // No right margin for last column
+          (index + 1) % 3 === 0 && { marginRight: 0 } 
         ]}
       />
     )}
