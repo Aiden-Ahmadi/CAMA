@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#B8B4D6", // light lavender background
+    backgroundColor: "#B8B4D6", // light purple background
     padding: SPACING.md,
   },
   header: {

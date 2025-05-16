@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     fontSize: 16,
     backgroundColor: "#fff",
-    marginBottom: 12, // Adds spacing between inputs
+    marginBottom: 12,
   },
   loginButton: {
     backgroundColor: "#007bff",
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     borderRadius: 8,
-    marginBottom: 15, // Adds spacing between buttons
+    marginBottom: 15, 
   },
   loginButtonText: {
     color: "#fff",
